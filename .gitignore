@@ -102,3 +102,14 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# idea file
+/.idea
+
+# system files
+.DS_Store
+
+### macOS ###
+*.DS_Store
+.AppleDouble
+.LSOverride
