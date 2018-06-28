@@ -25,7 +25,6 @@ setuptools.setup(
         'imblearn',
         'sklearn',
         'numpy',
-        'pickle',
         'matplotlib'
     ],
     zip_safe=False
