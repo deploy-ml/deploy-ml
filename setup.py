@@ -17,5 +17,17 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Development Status :: 1 - Planning",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Software Development :: Build Tools"
     ),
+    install_requires=[
+        'imblearn',
+        'sklearn',
+        'numpy',
+        'pickle',
+        'matplotlib'
+    ],
+    zip_safe=False
 )
+
