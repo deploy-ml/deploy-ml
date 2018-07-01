@@ -64,7 +64,7 @@ class TrainingBase(DeploymentBase):
         self.best_model = None
 
     def plot_learning_curve(self, batch_size=100, starting_point=100, scale=False, scaling_tool='standard',
-                            resample=False, resample_ratio=1, early_stopping=False, cut_off=30):
+                            resample=False, resample_ratio=1.0, early_stopping=False, cut_off=30):
         """
         Generates lists of training and testing error through the training process
         which can be plotted to check for over fitting
@@ -154,7 +154,7 @@ class TrainingBase(DeploymentBase):
                     self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
 
     def quick_train(self, scale=False, scaling_tool='standard',
-                    resample=False, resample_ratio=1, epochs=1, batch_size=None):
+                    resample=False, resample_ratio=1.0, epochs=1, batch_size=None):
         """
         Trains a model quickly
         :param scale: if set True, the input data is scaled

@@ -6,7 +6,7 @@ from deployml.sklearn.train.training import TrainingBase
 
 class DecisionTree(TrainingBase):
 
-    def __init__(self, forrest, number_of_trees=None):
+    def __init__(self, forrest=False, number_of_trees=None):
         """
         Creates the decision tree object with training base functions
         :param forrest: If set to True, multiple decision trees are created
