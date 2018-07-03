@@ -5,14 +5,14 @@ from deployml.sklearn.train.training import TrainingBase
 
 class NeuralNetworkBase(TrainingBase):
 
-    def __init__(self, activation_fn='relu'):
-        super().__init__(selected_model=MLPClassifier(activation=activation_fn))
+    def __init__(self, hidden_layers=(100,), activation_fn='relu',
+                 solver='adam', alpha=0., learning_rate="constant",
+                 learning_rate_init=0.001, momentum=0.9):
+        super().__init__(selected_model=MLPClassifier(activation=activation_fn, hidden_layer_sizes=hidden_layers,
+                                                      solver=solver, alpha=alpha, learning_rate=learning_rate,
+                                                      learning_rate_init=learning_rate_init, momentum=momentum))
         self.model_title = "Neural Network"
-        self.hidden_layers = (2, 2)
-        self.weights = {}
-        self.intercept = 0
-        self.penalty = None
-        self.best_penalty = None
+        self.hidden_layers = hidden_layers
         self.structure = None
         self.activation_function = activation_fn
 

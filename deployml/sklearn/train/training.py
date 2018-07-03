@@ -52,7 +52,6 @@ class TrainingBase(DeploymentBase):
         self.predictions = None
         self.trained = False
         self.learning_curve = False
-        # self.penalty = 'l1'
         self.grid = 0
         self.X_report = None
         self.y_report = None
@@ -64,7 +63,7 @@ class TrainingBase(DeploymentBase):
         self.best_model = None
 
     def plot_learning_curve(self, batch_size=100, starting_point=100, scale=False, scaling_tool='standard',
-                            resample=False, resample_ratio=1, early_stopping=False, cut_off=30):
+                            resample=False, resample_ratio=1.0, early_stopping=False, cut_off=30):
         """
         Generates lists of training and testing error through the training process
         which can be plotted to check for over fitting
@@ -154,7 +153,7 @@ class TrainingBase(DeploymentBase):
                     self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
 
     def quick_train(self, scale=False, scaling_tool='standard',
-                    resample=False, resample_ratio=1, epochs=1, batch_size=None):
+                    resample=False, resample_ratio=1.0):
         """
         Trains a model quickly
         :param scale: if set True, the input data is scaled
@@ -193,14 +192,7 @@ class TrainingBase(DeploymentBase):
         else:
             self.scaled_inputs = False
 
-        if self.tensor:
-            self.model.fit(self.X_train, self.y_train, batch_size=self.batch_size,
-                           steps=self.steps)
-        elif self.keras:
-            self.model.fit(self.X_train, self.y_train,
-                           epochs=epochs, batch_size=batch_size)
-        else:
-             self.model.fit(self.X_train, self.y_train)
+         self.model.fit(self.X_train, self.y_train)
 
     def show_learning_curve(self, save=False):
         """
@@ -215,7 +207,7 @@ class TrainingBase(DeploymentBase):
         plt.title('Learning Curve for {}'.format(self.model_title))
         plt.legend(loc='upper right')
         if save:
-            plt.savefig('learning_curve')
+            plt.savefig('{} learning_curve'.format(self.model_title))
         plt.show()
 
     def show_roc_curve(self, save=False):
@@ -237,7 +229,7 @@ class TrainingBase(DeploymentBase):
         plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
         if save:
-            plt.savefig('ROC')
+            plt.savefig('{} ROC'.format(self.model_title))
         plt.show()
 
     def evaluate_outcome(self, best=False):
@@ -247,8 +239,6 @@ class TrainingBase(DeploymentBase):
         """
         if best:
             self.predictions = self.best_model.predict(self.X_test)
-        elif self.keras:
-            self.predictions = self.model.predict_classes(self.X_test)
         else:
             self.predictions = self.model.predict(self.X_test)
         self.general_report = classification_report(self.y_test, self.predictions)
