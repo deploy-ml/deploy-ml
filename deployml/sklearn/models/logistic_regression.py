@@ -5,12 +5,12 @@ from sklearn.model_selection import GridSearchCV
 
 class LogisticRegressionBase(TrainingBase):
 
-    def __init__(self):
-        super().__init__(selected_model=LogisticRegression())
+    def __init__(self, penalty='l2'):
+        super().__init__(selected_model=LogisticRegression(penalty=penalty))
         self.log = []
         self.weights = {}
         self.intercept = 0
-        self.penalty = None
+        self.penalty = penalty
         self.best_penalty = None
         self.model_title = "Logistic Regression"
 
