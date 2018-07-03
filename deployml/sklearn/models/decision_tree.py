@@ -6,7 +6,8 @@ from deployml.sklearn.train.training import TrainingBase
 
 class DecisionTree(TrainingBase):
 
-    def __init__(self, forrest, number_of_trees=None):
+    def __init__(self, number_of_trees=1, max_features='auto',
+                 max_depth=None, min_samples_leaf=1):
         """
         Creates the decision tree object with training base functions
         :param forrest: If set to True, multiple decision trees are created
@@ -15,14 +16,12 @@ class DecisionTree(TrainingBase):
                                 higher may increase accuracy but slows down
                                 computational speed
         """
-        if forrest:
-            self.model_title = "Random Forrest"
-            if number_of_trees:
-                super().__init__(selected_model=RandomForestClassifier(n_estimators=number_of_trees))
-            else:
-                super().__init__(selected_model=RandomForestClassifier())
-        else:
-            super().__init__(selected_model=DecisionTreeClassifier())
+
+        super().__init__(selected_model=RandomForestClassifier(n_estimators=number_of_trees,
+                                                               max_features=max_features,
+                                                               max_depth=max_depth,
+                                                               min_samples_leaf=min_samples_leaf))
+        if number_of_trees == 1:
             self.model_title = "Decision Tree"
-        self.penalty = None
-        self.best_penalty = None
+        else:
+            self.model_title = "Random Forest"
