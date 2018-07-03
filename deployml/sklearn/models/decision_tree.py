@@ -1,4 +1,3 @@
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 from deployml.sklearn.train.training import TrainingBase

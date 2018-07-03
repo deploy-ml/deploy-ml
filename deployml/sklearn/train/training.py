@@ -192,7 +192,7 @@ class TrainingBase(DeploymentBase):
         else:
             self.scaled_inputs = False
 
-         self.model.fit(self.X_train, self.y_train)
+        self.model.fit(self.X_train, self.y_train)
 
     def show_learning_curve(self, save=False):
         """
