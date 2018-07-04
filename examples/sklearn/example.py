@@ -2,11 +2,12 @@
 In this file we use deploy-ml to apply an sk-learn logistic regression to
 cleaned Titanic data, we then evaluate it and deploy it
 """
-import pandas as pd
 import pickle
 
 # we import logistic regression
-from deployml.sklearn.models.logistic_regression import LogisticRegressionBase
+from deployml.sklearn import LogisticRegressionBase
+
+import pandas as pd
 
 # we load the data
 train = pd.read_csv('titanic_example.csv')
@@ -53,7 +54,7 @@ input_data = loaded_algorithm['scaler'].transform([[2, 34, 0, 0, 50, 1, 0, 1]])
 new_prediction = loaded_algorithm['model'].predict_proba(input_data)[0][1]
 print(new_prediction)
 
-from deployml.sklearn.models.decision_tree import DecisionTree
+from deployml.sklearn import DecisionTree
 
 log = DecisionTree(number_of_trees=10)
 
@@ -98,7 +99,7 @@ new_prediction = loaded_algorithm['model'].predict_proba(input_data)[0][1]
 print(new_prediction)
 
 
-from deployml.sklearn.models.neural_network import NeuralNetworkBase
+from deployml.sklearn import NeuralNetworkBase
 
 log = NeuralNetworkBase(hidden_layers=(5, 2))
 

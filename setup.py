@@ -4,9 +4,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="deployml_pkg",
+    name="deployml",
     version="0.0.1",
-    author="Maxwell Flitton, Rmain Belia",
+    author="Maxwell Flitton, Romain Belia",
     author_email="maxwellflitton@gmail.com",
     description="Easy training and deployment of machine learning algorithms",
     long_description=long_description,
@@ -22,6 +22,7 @@ setuptools.setup(
         "Topic :: Software Development :: Build Tools"
     ),
     install_requires=[
+        'pandas',
         'imblearn',
         'sklearn',
         'numpy',
@@ -29,4 +30,3 @@ setuptools.setup(
     ],
     zip_safe=False
 )
-
