@@ -1,10 +1,10 @@
 # Deploy-ML for SK-Learn Documentation
 Deploy-ML supports the training, evaluation, and packaging of the SK-Learn library:
 
-* [models] (#sk-lean-models)
-* [training/testing] (#sk-learn-training)
-* [deploying your model] (#sk-learn-deployment)
-* [loading and using your model] (#loading-model)
+* [models](#sk-lean-models)
+* [training/testing](#sk-learn-training)
+* [deploying your model](#sk-learn-deployment)
+* [loading and using your model](#loading-model)
 
 
 # Sk-Lean Models
