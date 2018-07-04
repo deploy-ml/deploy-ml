@@ -10,11 +10,11 @@ Deploy-ML supports the training, evaluation, and packaging of the SK-Learn libra
 # Sk-Lean Models
 Deploy-ML supports, trains and packages models by the machine learning package SK-Learn. The following models are currently supported:
 
-* [Import] (##import)
-* [Logistic Regression] (##logistic-regression)
-* [Support Vector Machine] (##support-vector-machine)
-* [Neural Network] (##neural-network)
-* [Decision Tree and Random Forest] (##decision-tree-and-random-forest)
+* [Import](#import)
+* [Logistic Regression](#logistic-regression)
+* [Support Vector Machine](#support-vector-machine)
+* [Neural Network](#neural-network)
+* [Decision Tree and Random Forest](#decision-tree-and-random-forest)
 
 ## Import 
 Deploy-ML aims to make the process of training, testing and deploying machine learning easier and simplier. However, sometimes the model required is not directly supported, or a collegue has already defined a model. The import class is for users who define their own sk-learn model, but want to use the package for training and deployment reasons. To use your sk-learn model, import the import class:
