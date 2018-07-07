@@ -14,7 +14,7 @@ from deployml.sklearn.deploy.base import DeploymentBase
 
 class TrainingBase(DeploymentBase):
 
-    def __init__(self, selected_model, tensor=False, keras=False, batch_size=None, steps=None):
+    def __init__(self, selected_model, batch_size=None, steps=None):
         """
         Base training functions, this class is usually inherited by a machine learning model
         so it's usually not created by itself
@@ -22,15 +22,6 @@ class TrainingBase(DeploymentBase):
                                machine learning model object inheriting this class
         """
         super().__init__()
-        if tensor:
-            self.tensor = True
-            self.keras = False
-        elif keras:
-            self.tensor = False
-            self.keras = True
-        else:
-            self.tensor = False
-            self.keras = False
         self.batch_size = batch_size
         self.steps = steps
         self.auc = 0
@@ -115,42 +106,29 @@ class TrainingBase(DeploymentBase):
         else:
             self.scaled_inputs = False
 
-        if self.tensor:
-
+        if early_stopping:
             for i in range(starting_point, len(self.X_train), batch_size):
+
                 self.model.fit(self.X_train[:i], self.y_train[:i])
 
-                y_train_predict = self.model.predict(self.X_train[:i], batch_size=self.batch_size,
-                                                     )
+                y_train_predict = self.model.predict(self.X_train[:i])
                 y_test_predict = self.model.predict(self.X_test)
 
                 self.train_errors.append(mean_squared_error(y_train_predict, self.y_train[:i]))
                 self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
+                if len(self.train_errors) == cut_off:
+                    break
 
         else:
-            if early_stopping:
-                for i in range(starting_point, len(self.X_train), batch_size):
+            for i in range(starting_point, len(self.X_train), batch_size):
 
-                    self.model.fit(self.X_train[:i], self.y_train[:i])
+                self.model.fit(self.X_train[:i], self.y_train[:i])
 
-                    y_train_predict = self.model.predict(self.X_train[:i])
-                    y_test_predict = self.model.predict(self.X_test)
+                y_train_predict = self.model.predict(self.X_train[:i])
+                y_test_predict = self.model.predict(self.X_test)
 
-                    self.train_errors.append(mean_squared_error(y_train_predict, self.y_train[:i]))
-                    self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
-                    if len(self.train_errors) == cut_off:
-                        break
-
-            else:
-                for i in range(starting_point, len(self.X_train), batch_size):
-
-                    self.model.fit(self.X_train[:i], self.y_train[:i])
-
-                    y_train_predict = self.model.predict(self.X_train[:i])
-                    y_test_predict = self.model.predict(self.X_test)
-
-                    self.train_errors.append(mean_squared_error(y_train_predict, self.y_train[:i]))
-                    self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
+                self.train_errors.append(mean_squared_error(y_train_predict, self.y_train[:i]))
+                self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
 
     def quick_train(self, scale=False, scaling_tool='standard',
                     resample=False, resample_ratio=1.0):

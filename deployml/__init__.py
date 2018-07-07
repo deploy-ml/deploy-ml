@@ -1,5 +1,5 @@
 import sklearn
 
-# import keras
+import keras
 
 # import tensorflow
