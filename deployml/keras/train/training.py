@@ -9,7 +9,7 @@ from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
 import numpy as np
 
-from deployml.sklearn.deploy.base import DeploymentBase
+from deployml.keras.deploy.base import DeploymentBase
 
 
 class TrainingBase(DeploymentBase):
@@ -191,15 +191,16 @@ class TrainingBase(DeploymentBase):
             plt.savefig('learning_curve')
         plt.show()
 
+# this ROC curve needs work, it's currently not supported by Keras
     def show_roc_curve(self, save=False):
         """
         Plots the ROC curve to see True and False positive trade off
         :param save: if set to True plot will be saved as file
         :return: self.auc which can be used as a score
         """
-        logit_roc_auc = roc_auc_score(self.y_test, self.model.predict(self.X_test))
+        logit_roc_auc = roc_auc_score(self.y_test, self.model.predict_classes(self.X_test))
         self.auc = logit_roc_auc
-        fpr, tpr, thresholds = roc_curve(self.y_test, self.model.predict_proba(self.X_test)[:, 1])
+        fpr, tpr, thresholds = roc_curve(self.y_test, self.model.predict(self.X_test)[:, 1])
         plt.figure()
         plt.plot(fpr, tpr, label='RPC Curve (area = {}0.2f)'.format(logit_roc_auc))
         plt.plot([0, 1], [0, 1], 'r--')
@@ -212,21 +213,20 @@ class TrainingBase(DeploymentBase):
         if save:
             plt.savefig('ROC')
         plt.show()
+# this ROC curve needs work, it's currently not supported by Keras
 
-    def evaluate_outcome(self, best=False):
+    def evaluate_outcome(self):
         """
         Prints classification report of finished model
         :return: list of predictions from the X_test data subset
         """
-        if best:
-            self.predictions = self.best_model.predict(self.X_test)
-        elif self.keras:
-            self.predictions = self.model.predict_classes(self.X_test)
-        else:
-            self.predictions = self.model.predict(self.X_test)
+
+        self.predictions = self.model.predict_classes(self.X_test)
+
         self.general_report = classification_report(self.y_test, self.predictions)
         print(self.general_report)
 
+# this cross val needs work, it's currently not supported by Keras
     def evaluate_cross_validation(self, n_splits=10, random_state=7):
         """
         Performs a cross validation score evaluating how the model performs in different subsets
@@ -237,6 +237,7 @@ class TrainingBase(DeploymentBase):
         scoring = 'accuracy'
         self.cross_val = cross_val_score(self.model, self.X_train, self.y_train, cv=k_fold, scoring=scoring)
         print("{}-fold cross validation average accuracy: {}".format(n_splits, self.cross_val.mean()))
+# this cross val needs work, it's currently not supported by Keras
 
     def calculate(self, input_array, happening=True, override=False):
         """
@@ -250,6 +251,6 @@ class TrainingBase(DeploymentBase):
         if self.scaled_inputs and not override:
             input_array = self.scaling_tool.transform(input_array)
         if happening:
-            return self.model.predict_proba([input_array])[0][1]
+            return self.model.predict([input_array])[0][0]
         else:
-            return self.model.predict_proba([input_array])[0][0]
+            return self.model.predict([input_array])[0][0]

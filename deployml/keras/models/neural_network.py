@@ -5,6 +5,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers import LeakyReLU, ELU
 
 from deployml.keras.train.training import TrainingBase
+from deployml.keras.deploy.pickle_prep import make_keras_picklable
 
 
 class NeuralNetworkBase(TrainingBase):
@@ -14,6 +15,9 @@ class NeuralNetworkBase(TrainingBase):
                  first_layer=15, optimizer='adam', alpha=0.3, dropout_option=False,
                  batch_norm=False, use_bias=True
                  ):
+
+        make_keras_picklable()
+
         if activation_fn == "leaky relu":
             activation_fn = LeakyReLU(alpha=alpha)
         elif activation_fn == 'elu':
@@ -42,4 +46,4 @@ class NeuralNetworkBase(TrainingBase):
         model.add(Dense(1, activation='sigmoid'))
 
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-        super().__init__(selected_model=model, keras=True, batch_size=batch_size, steps=steps)
+        super().__init__(selected_model=model, batch_size=batch_size, steps=steps)
