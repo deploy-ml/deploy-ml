@@ -1,13 +1,19 @@
+import os
+
 import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+version_contents = {}
+with open(os.path.join('deployml', 'version.py')) as f:
+    exec(f.read(), version_contents)
+
 setuptools.setup(
     name="deployml",
-    version="0.0.1",
+    version=version_contents['VERSION'],
     author="Maxwell Flitton, Romain Belia",
-    author_email="maxwellflitton@gmail.com",
+    author_email="maxwellflitton@gmail.com, belia.bourgeois.romain@gmail.com",
     description="Easy training and deployment of machine learning algorithms",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -26,7 +32,8 @@ setuptools.setup(
         'imblearn',
         'sklearn',
         'numpy',
-        'matplotlib'
+        'matplotlib',
+        'keras'
     ],
     zip_safe=False
 )
