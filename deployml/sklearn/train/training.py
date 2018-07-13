@@ -66,7 +66,7 @@ class TrainingBase(DeploymentBase):
         """
         self.train_errors = []
         self.test_errors = []
-        self.scaled_inputs = True
+        self.scaled_inputs = False
         self.X = self.data.drop(self.outcome_pointer, axis=1)
         self.input_order = list(self.X.columns.values)
         self.y = self.data[self.outcome_pointer]

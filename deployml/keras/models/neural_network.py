@@ -11,9 +11,8 @@ from deployml.keras.deploy.pickle_prep import make_keras_picklable
 class NeuralNetworkBase(TrainingBase):
 
     def __init__(self, hidden_layers=[10, 10], n_classes=10,
-                 batch_size=50, steps=40000, activation_fn='relu',
-                 first_layer=15, optimizer='adam', alpha=0.3, dropout_option=False,
-                 batch_norm=False, use_bias=True
+                 activation_fn='relu', first_layer=15, optimizer='adam',
+                 alpha=0.3, dropout_option=False, batch_norm=False, use_bias=True
                  ):
 
         make_keras_picklable()
@@ -28,22 +27,22 @@ class NeuralNetworkBase(TrainingBase):
         if dropout_option:
             if batch_norm:
                 for i in hidden_layers:
-                    model.add(Dense(i, activation=activation_fn, use_bias=True))
+                    model.add(Dense(i, activation=activation_fn, use_bias=use_bias))
                     model.add(BatchNormalization())
                     model.add(Dropout(0.5))
             else:
                 for i in hidden_layers:
-                    model.add(Dense(i, activation=activation_fn, use_bias=True))
+                    model.add(Dense(i, activation=activation_fn, use_bias=use_bias))
                     model.add(Dropout(0.5))
         else:
             if batch_norm:
                 for i in hidden_layers:
-                    model.add(Dense(i, activation=activation_fn, use_bias=True))
+                    model.add(Dense(i, activation=activation_fn, use_bias=use_bias))
                     model.add(BatchNormalization())
             else:
                 for i in hidden_layers:
-                    model.add(Dense(i, activation=activation_fn, use_bias=True))
+                    model.add(Dense(i, activation=activation_fn, use_bias=use_bias))
         model.add(Dense(1, activation='sigmoid'))
 
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-        super().__init__(selected_model=model, batch_size=batch_size, steps=steps)
+        super().__init__(selected_model=model)
