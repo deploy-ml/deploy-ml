@@ -1,9 +1,6 @@
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import classification_report
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, normalize
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_curve, classification_report, auc
 from imblearn.over_sampling import SMOTE
 
 import matplotlib.pyplot as plt
@@ -61,7 +58,7 @@ class TrainingBase(DeploymentBase):
         self.y = self.data[self.outcome_pointer]
         self.input_order = list(self.X.columns.values)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
+                                                                                random_state=101
                                                                                 )
 
         if resample:
@@ -110,29 +107,28 @@ class TrainingBase(DeploymentBase):
             plt.savefig('learning_curve')
         plt.show()
 
-# this ROC curve needs work, it's currently not supported by Keras
     def show_roc_curve(self, save=False):
         """
         Plots the ROC curve to see True and False positive trade off
         :param save: if set to True plot will be saved as file
         :return: self.auc which can be used as a score
         """
-        logit_roc_auc = roc_auc_score(self.y_test, self.model.predict_classes(self.X_test))
-        self.auc = logit_roc_auc
-        fpr, tpr, thresholds = roc_curve(self.y_test, self.model.predict(self.X_test)[:, 1])
-        plt.figure()
-        plt.plot(fpr, tpr, label='RPC Curve (area = {}0.2f)'.format(logit_roc_auc))
-        plt.plot([0, 1], [0, 1], 'r--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Receiver operating characteristic')
-        plt.legend(loc="lower right")
+        y_pred_keras = self.model.predict(self.X_test).ravel()
+        fpr_keras, tpr_keras, thresholds_keras = roc_curve(self.y_test, y_pred_keras)
+        auc_keras = auc(fpr_keras, tpr_keras)
+
+        plt.figure(1)
+        plt.plot([0, 1], [0, 1], 'k--')
+        plt.plot(fpr_keras, tpr_keras, label='Keras (area = {:.3f})'.format(auc_keras))
+        plt.xlabel('False positive rate')
+        plt.ylabel('True positive rate')
+        plt.title('ROC curve')
+        plt.legend(loc='best')
+        plt.show()
+
         if save:
             plt.savefig('ROC')
         plt.show()
-# this ROC curve needs work, it's currently not supported by Keras
 
     def evaluate_outcome(self):
         """

@@ -72,7 +72,7 @@ class TrainingBase(DeploymentBase):
         self.y = self.data[self.outcome_pointer]
 
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
+                                                                                random_state=101
                                                                                 )
 
         if resample:
@@ -143,7 +143,7 @@ class TrainingBase(DeploymentBase):
         self.y = self.data[self.outcome_pointer]
         self.input_order = list(self.X.columns.values)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
+                                                                                random_state=101
                                                                                 )
 
         if resample:
