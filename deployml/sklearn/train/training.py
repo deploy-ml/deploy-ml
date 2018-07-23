@@ -66,13 +66,13 @@ class TrainingBase(DeploymentBase):
         """
         self.train_errors = []
         self.test_errors = []
-        self.scaled_inputs = True
+        self.scaled_inputs = False
         self.X = self.data.drop(self.outcome_pointer, axis=1)
         self.input_order = list(self.X.columns.values)
         self.y = self.data[self.outcome_pointer]
 
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
+                                                                                random_state=101
                                                                                 )
 
         if resample:
@@ -143,7 +143,7 @@ class TrainingBase(DeploymentBase):
         self.y = self.data[self.outcome_pointer]
         self.input_order = list(self.X.columns.values)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
+                                                                                random_state=101
                                                                                 )
 
         if resample:

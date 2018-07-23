@@ -1,9 +1,6 @@
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import classification_report
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, normalize
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_curve, classification_report, auc
 from imblearn.over_sampling import SMOTE
 
 import matplotlib.pyplot as plt
@@ -14,7 +11,7 @@ from deployml.keras.deploy.base import DeploymentBase
 
 class TrainingBase(DeploymentBase):
 
-    def __init__(self, selected_model, batch_size=None, steps=None):
+    def __init__(self, selected_model):
         """
         Base training functions, this class is usually inherited by a machine learning model
         so it's usually not created by itself
@@ -22,8 +19,6 @@ class TrainingBase(DeploymentBase):
                                machine learning model object inheriting this class
         """
         super().__init__()
-        self.batch_size = batch_size
-        self.steps = steps
         self.auc = 0
         self.cross_val = 0
         self.model = selected_model
@@ -38,12 +33,9 @@ class TrainingBase(DeploymentBase):
         self.y_train = None
         self.y_test = None
         self.outcome_metrics = None
-        self.train_errors = []
-        self.test_errors = []
         self.predictions = None
         self.trained = False
-        self.learning_curve = False
-        self.grid = 0
+        self.history = None
         self.X_report = None
         self.y_report = None
         self.general_report = "General Report not generated when model was trained"
@@ -53,107 +45,25 @@ class TrainingBase(DeploymentBase):
         self.best_epoch = None
         self.best_model = None
 
-    def plot_learning_curve(self, batch_size=100, starting_point=100, scale=False, scaling_tool='standard',
-                            resample=False, resample_ratio=1, early_stopping=False, cut_off=30,
-                            epochs=1):
-        """
-        Generates lists of training and testing error through the training process
-        which can be plotted to check for over fitting
-        :param batch_size: How many data points get trained in each cycle (cannot be zero)
-        :param starting_point: first batch to be trained (cannot be zero)
-        :param scale: if set True, the input data is scaled
-        :param scaling_tool: defines the type of scaling tool used when pre-processing data
-        :return: trained model with a learning curve
-        """
-        self.train_errors = []
-        self.test_errors = []
-        self.scaled_inputs = True
-        self.X = self.data.drop(self.outcome_pointer, axis=1)
-        self.input_order = list(self.X.columns.values)
-        self.y = self.data[self.outcome_pointer]
-
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
-                                                                                )
-
-        if resample:
-            sm = SMOTE(ratio=resample_ratio)
-            self.X_train, self.y_train = sm.fit_sample(self.X_train, self.y_train)
-
-            # self.X_train = sampling_data.drop(self.outcome_pointer, axis=1)
-            # self.y_train = sampling_data[self.outcome_pointer]
-
-        self.X_report = np.array(self.X_test)
-        self.y_report = np.array(self.y_test)
-
-        if scale:
-            self.scaled_inputs = True
-            self.scaling_title = scaling_tool
-            if scaling_tool == 'standard':
-                self.scaled_inputs = True
-                self.scaling_tool = StandardScaler()
-                self.scaling_tool.fit(self.X_train)
-                self.X_train = self.scaling_tool.transform(self.X_train)
-                self.X_test = self.scaling_tool.transform(self.X_test)
-            elif scaling_tool == 'min max':
-                self.scaled_inputs = True
-                self.scaling_tool = MinMaxScaler()
-                self.scaling_tool.fit(self.X_train)
-                self.X_train = self.scaling_tool.transform(self.X_train)
-                self.X_test = self.scaling_tool.transform(self.X_test)
-            elif scaling_tool == 'normalize':
-                self.scaling_tool = normalize(self.X_train)
-
-        else:
-            self.scaled_inputs = False
-
-        if early_stopping:
-            for i in range(starting_point, len(self.X_train), batch_size):
-
-                self.model.fit(self.X_train[:i], self.y_train[:i],
-                               epochs=epochs, batch_size=batch_size)
-
-                y_train_predict = self.model.predict(self.X_train[:i])
-                y_test_predict = self.model.predict(self.X_test)
-
-                self.train_errors.append(mean_squared_error(y_train_predict, self.y_train[:i]))
-                self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
-                if len(self.train_errors) == cut_off:
-                    break
-
-        else:
-            for i in range(starting_point, len(self.X_train), batch_size):
-
-                self.model.fit(self.X_train[:i], self.y_train[:i])
-
-                y_train_predict = self.model.predict(self.X_train[:i])
-                y_test_predict = self.model.predict(self.X_test)
-
-                self.train_errors.append(mean_squared_error(y_train_predict, self.y_train[:i]))
-                self.test_errors.append(mean_squared_error(y_test_predict, self.y_test))
-
-    def quick_train(self, scale=False, scaling_tool='standard',
-                    resample=False, resample_ratio=1, epochs=1, batch_size=100):
+    def train(self, scale=False, scaling_tool='standard',
+                    resample=False, resample_ratio=1, epochs=150, batch_size=100, verbose=0):
         """
         Trains a model quickly
         :param scale: if set True, the input data is scaled
         :param scaling_tool: defines the type of scaling tool used when pre-processing data
         :return: a trained model with no learning curve
         """
-        self.learning_curve = False
+
         self.X = self.data.drop(self.outcome_pointer, axis=1)
         self.y = self.data[self.outcome_pointer]
         self.input_order = list(self.X.columns.values)
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                # random_state=101
+                                                                                random_state=101
                                                                                 )
 
         if resample:
             sm = SMOTE(ratio=resample_ratio)
             self.X_train, self.y_train = sm.fit_sample(self.X_train, self.y_train)
-
-            # self.X_train = sampling_data.drop(self.outcome_pointer, axis=1)
-            # self.y_train = sampling_data[self.outcome_pointer]
 
         self.X_report = np.array(self.X_test)
         self.y_report = np.array(self.y_test)
@@ -172,17 +82,23 @@ class TrainingBase(DeploymentBase):
         else:
             self.scaled_inputs = False
 
-        self.model.fit(self.X_train, self.y_train,
-                       epochs=epochs, batch_size=batch_size)
+        self.history = self.model.fit(self.X_train, self.y_train, validation_split=0.33,
+                                      epochs=epochs, batch_size=batch_size, verbose=verbose)
 
-    def show_learning_curve(self, save=False):
+    def show_learning_curve(self, save=False, metric='loss'):
         """
         :param save: if set to True plot will be saved as file
         Plots the learning curve of test and train sets
         """
         plt.figure(figsize=(15, 7))
-        plt.plot(np.sqrt(self.train_errors), "r-+", linewidth=2, label="train")
-        plt.plot(np.sqrt(self.test_errors), "b-", linewidth=3, label="val")
+        if metric == 'loss':
+            plt.plot(self.history.history['loss'], "r-+", linewidth=2, label="train")
+            plt.plot(self.history.history['val_loss'], "b-", linewidth=3, label="val")
+
+        elif metric == 'accuracy':
+            plt.plot(self.history.history['acc'], "r-+", linewidth=2, label="train")
+            plt.plot(self.history.history['val_acc'], "b-", linewidth=3, label="val")
+
         plt.xlabel("Iterations")
         plt.ylabel('Error')
         plt.title('Learning Curve for {}'.format(self.model_title))
@@ -191,29 +107,28 @@ class TrainingBase(DeploymentBase):
             plt.savefig('learning_curve')
         plt.show()
 
-# this ROC curve needs work, it's currently not supported by Keras
     def show_roc_curve(self, save=False):
         """
         Plots the ROC curve to see True and False positive trade off
         :param save: if set to True plot will be saved as file
         :return: self.auc which can be used as a score
         """
-        logit_roc_auc = roc_auc_score(self.y_test, self.model.predict_classes(self.X_test))
-        self.auc = logit_roc_auc
-        fpr, tpr, thresholds = roc_curve(self.y_test, self.model.predict(self.X_test)[:, 1])
-        plt.figure()
-        plt.plot(fpr, tpr, label='RPC Curve (area = {}0.2f)'.format(logit_roc_auc))
-        plt.plot([0, 1], [0, 1], 'r--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Receiver operating characteristic')
-        plt.legend(loc="lower right")
+        y_pred_keras = self.model.predict(self.X_test).ravel()
+        fpr_keras, tpr_keras, thresholds_keras = roc_curve(self.y_test, y_pred_keras)
+        auc_keras = auc(fpr_keras, tpr_keras)
+
+        plt.figure(1)
+        plt.plot([0, 1], [0, 1], 'k--')
+        plt.plot(fpr_keras, tpr_keras, label='Keras (area = {:.3f})'.format(auc_keras))
+        plt.xlabel('False positive rate')
+        plt.ylabel('True positive rate')
+        plt.title('ROC curve')
+        plt.legend(loc='best')
+        plt.show()
+
         if save:
             plt.savefig('ROC')
         plt.show()
-# this ROC curve needs work, it's currently not supported by Keras
 
     def evaluate_outcome(self):
         """
