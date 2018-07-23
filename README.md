@@ -4,8 +4,9 @@ This open source library is esentually a wrapper for popular machine learning li
 
 ## Installation
 You don't need this source code unless you want to modify the package. If you just want to use the package, just run:
-
-`pip install --upgrade stripe`
+```
+pip install --upgrade deployml`
+```
 
 Install from source with:
 
