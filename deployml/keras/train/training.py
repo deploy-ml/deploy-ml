@@ -11,7 +11,7 @@ from deployml.keras.deploy.base import DeploymentBase
 
 class TrainingBase(DeploymentBase):
 
-    def __init__(self, selected_model):
+    def __init__(self, selected_model, convolutional=False):
         """
         Base training functions, this class is usually inherited by a machine learning model
         so it's usually not created by itself
@@ -44,6 +44,7 @@ class TrainingBase(DeploymentBase):
         self.support_vector = False
         self.best_epoch = None
         self.best_model = None
+        self.convolutional = convolutional
 
     def train(self, scale=False, scaling_tool='standard',
                     resample=False, resample_ratio=1, epochs=150, batch_size=100, verbose=0):
