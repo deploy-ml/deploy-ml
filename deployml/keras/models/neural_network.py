@@ -46,3 +46,4 @@ class NeuralNetworkBase(TrainingBase):
 
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         super().__init__(selected_model=model)
+        self.model_title = "Keras Basic Neural Network"
