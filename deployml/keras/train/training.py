@@ -1,6 +1,8 @@
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, normalize
 from sklearn.metrics import roc_curve, classification_report, auc
+from keras.preprocessing.image import ImageDataGenerator
+from deployml.keras.train.loading_pictures import load_picture_data
 from imblearn.over_sampling import SMOTE
 
 import matplotlib.pyplot as plt
@@ -55,36 +57,49 @@ class TrainingBase(DeploymentBase):
         :return: a trained model with no learning curve
         """
 
-        self.X = self.data.drop(self.outcome_pointer, axis=1)
-        self.y = self.data[self.outcome_pointer]
-        self.input_order = list(self.X.columns.values)
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
-                                                                                random_state=101
-                                                                                )
+        if self.convolutional:
+            self.X_train, self.X_test, self.y_train, self.y_test = load_picture_data()
 
-        if resample:
-            sm = SMOTE(ratio=resample_ratio)
-            self.X_train, self.y_train = sm.fit_sample(self.X_train, self.y_train)
+            aug = ImageDataGenerator(rotation_range=30, width_shift_range=0.1,
+                                     height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
+                                     horizontal_flip=True, fill_mode="nearest")
 
-        self.X_report = np.array(self.X_test)
-        self.y_report = np.array(self.y_test)
+            self.model.fit_generator(aug.flow(self.X_train, self.y_train, batch_size=batch_size),
+                                     validation_data=(self.X_test, self.y_test),
+                                     steps_per_epoch=len(self.X_train) // batch_size,
+                                     epochs=epochs, verbose=1)
 
-        if scale:
-            self.scaled_inputs = True
-            if scaling_tool == 'standard':
-                self.scaling_tool = StandardScaler()
-            elif scaling_tool == 'min max':
-                self.scaling_tool = MinMaxScaler()
-            elif scaling_tool == 'normalize':
-                self.scaling_tool = normalize()
-            self.scaling_tool.fit(self.X_train)
-            self.X_train = self.scaling_tool.transform(self.X_train)
-            self.X_test = self.scaling_tool.transform(self.X_test)
         else:
-            self.scaled_inputs = False
+            self.X = self.data.drop(self.outcome_pointer, axis=1)
+            self.y = self.data[self.outcome_pointer]
+            self.input_order = list(self.X.columns.values)
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.33,
+                                                                                    random_state=101
+                                                                                    )
 
-        self.history = self.model.fit(self.X_train, self.y_train, validation_split=0.33,
-                                      epochs=epochs, batch_size=batch_size, verbose=verbose)
+            if resample:
+                sm = SMOTE(ratio=resample_ratio)
+                self.X_train, self.y_train = sm.fit_sample(self.X_train, self.y_train)
+
+            self.X_report = np.array(self.X_test)
+            self.y_report = np.array(self.y_test)
+
+            if scale:
+                self.scaled_inputs = True
+                if scaling_tool == 'standard':
+                    self.scaling_tool = StandardScaler()
+                elif scaling_tool == 'min max':
+                    self.scaling_tool = MinMaxScaler()
+                elif scaling_tool == 'normalize':
+                    self.scaling_tool = normalize()
+                self.scaling_tool.fit(self.X_train)
+                self.X_train = self.scaling_tool.transform(self.X_train)
+                self.X_test = self.scaling_tool.transform(self.X_test)
+            else:
+                self.scaled_inputs = False
+
+            self.history = self.model.fit(self.X_train, self.y_train, validation_split=0.33,
+                                          epochs=epochs, batch_size=batch_size, verbose=verbose)
 
     def show_learning_curve(self, save=False, metric='loss'):
         """

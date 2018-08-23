@@ -27,8 +27,10 @@ class ConvolutionalNeuralNetwork(TrainingBase):
 
         model = Sequential()
 
+        print("adding the first convolutional")
         model.add(Convolution2D(first_layer[0], first_layer[1], first_layer[2], activation='relu',
                                 input_shape=(1, input_dims[0], input_dims[1])))
+        print("managed to add it")
 
         # convolutional layers
         if dropout_option:
@@ -98,3 +100,5 @@ class ConvolutionalNeuralNetwork(TrainingBase):
         """
         self.pos_path = positive_path
         self.neg_path = negative_path
+
+test = ConvolutionalNeuralNetwork()
