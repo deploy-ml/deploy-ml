@@ -3,10 +3,12 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, normalize
 from sklearn.metrics import roc_curve, classification_report, auc
 from keras.preprocessing.image import ImageDataGenerator
 from deployml.keras.train.loading_pictures import load_picture_data
+from keras.preprocessing.image import img_to_array
 from imblearn.over_sampling import SMOTE
 
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 
 from deployml.keras.deploy.base import DeploymentBase
 
@@ -47,6 +49,8 @@ class TrainingBase(DeploymentBase):
         self.best_epoch = None
         self.best_model = None
         self.convolutional = convolutional
+        self.dims_one = 28
+        self.dims_two = 28
 
     def train(self, scale=False, scaling_tool='standard',
                     resample=False, resample_ratio=1, epochs=150, batch_size=100, verbose=0):
@@ -58,7 +62,9 @@ class TrainingBase(DeploymentBase):
         """
 
         if self.convolutional:
-            self.X_train, self.X_test, self.y_train, self.y_test = load_picture_data()
+            self.X_train, self.X_test, self.y_train, self.y_test = load_picture_data(
+                dims_one=self.dims_one, dims_two=self.dims_two
+            )
 
             aug = ImageDataGenerator(rotation_range=30, width_shift_range=0.1,
                                      height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
@@ -171,18 +177,28 @@ class TrainingBase(DeploymentBase):
         print("{}-fold cross validation average accuracy: {}".format(n_splits, self.cross_val.mean()))
 # this cross val needs work, it's currently not supported by Keras
 
-    def calculate(self, input_array, happening=True, override=False):
+    def calculate(self, input_array=None, happening=True, override=False, image_path=None):
         """
         Calculates probability of outcome
         WARNING [CANNOT BE USED ONCE MODEL IS PICKLED]
         :param input_array: array of inputs (should be same order as training data)
         :param happening: if set False, returns probability of event not happening
         :param override: set to True if you want to override scaling
+        :param image_path: string of the path to the image being fed into the model
         :return: float between 0 and 1
         """
-        if self.scaled_inputs and not override:
-            input_array = self.scaling_tool.transform(input_array)
-        if happening:
-            return self.model.predict([input_array])[0][0]
+        if self.convolutional:
+            image = cv2.imread(image_path)
+            image = cv2.resize(image, (self.dims_one, self.dims_two))
+            image = image.astype("float") / 255.0
+            image = img_to_array(image)
+            image = np.expand_dims(image, axis=0)
+            return self.model.predict(image)[0][0]
+
         else:
-            return self.model.predict([input_array])[0][0]
+            if self.scaled_inputs and not override:
+                input_array = self.scaling_tool.transform(input_array)
+            if happening:
+                return self.model.predict([input_array])[0][0]
+            else:
+                return self.model.predict([input_array])[0][0]
