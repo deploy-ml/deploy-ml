@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten, Convolution2D, MaxPooling2D
+from keras.layers.convolutional import Conv2D
 from keras.layers import LeakyReLU, ELU
 from keras.layers.normalization import BatchNormalization
 
@@ -9,9 +10,9 @@ from deployml.keras.deploy.pickle_prep import make_keras_picklable
 
 class ConvolutionalNeuralNetwork(TrainingBase):
 
-    def __init__(self, optimizer='adam', input_dims=[28, 28], activation_fn='relu',
+    def __init__(self, optimizer='adam', input_dims=(28, 28), activation_fn='relu',
                  dropout_option=False, batch_norm=False, con_hidden_layers=[(32, 3, 3), (32, 3, 3)],
-                 hidden_layers=[10, 10], pool_size=[2, 2], use_bias=True, alpha=0.3, first_layer=(32, 3, 3)):
+                 hidden_layers=(10, 10), pool_size=(2, 2), use_bias=True, alpha=0.3, first_layer=(32, 3, 3)):
 
         self.pos_path = None
         self.neg_path = None
@@ -27,34 +28,34 @@ class ConvolutionalNeuralNetwork(TrainingBase):
 
         model = Sequential()
 
-        print("adding the first convolutional")
-        model.add(Convolution2D(first_layer[0], first_layer[1], first_layer[2], activation='relu',
-                                input_shape=(1, input_dims[0], input_dims[1])))
-        print("managed to add it")
+        model.add(Convolution2D(first_layer[0], (first_layer[1], first_layer[2]), activation='relu',
+                                input_shape=(input_dims[0], input_dims[1], 3),
+                                # data_format='channels_first'
+                                ))
 
         # convolutional layers
         if dropout_option:
             if batch_norm:
                 for i in con_hidden_layers:
-                    model.add(Convolution2D(i[0], i[1], i[2], activation=activation_fn))
+                    model.add(Convolution2D(i[0], (i[1], i[2]), activation=activation_fn))
                     model.add(BatchNormalization())
                     model.add(Dropout(0.5))
             else:
                 for i in con_hidden_layers:
-                    model.add(Convolution2D(i[0], i[1], i[2], activation=activation_fn))
+                    model.add(Convolution2D(i[0], ([1], i[2]), activation=activation_fn))
                     model.add(Dropout(0.5))
 
         else:
             if batch_norm:
                 for i in con_hidden_layers:
-                    model.add(Convolution2D(i[0], i[1], i[2], activation=activation_fn))
+                    model.add(Convolution2D(i[0], (i[1], i[2]), activation=activation_fn))
                     model.add(BatchNormalization())
 
             else:
                 for i in con_hidden_layers:
-                    model.add(Convolution2D(i[0], i[1], i[2], activation=activation_fn))
+                    model.add(Convolution2D(i[0], (i[1], i[2]), activation=activation_fn))
 
-        model.add(MaxPooling2D(pool_size=(pool_size[0], pool_size[1])))
+        model.add(MaxPooling2D(pool_size=(pool_size[0], pool_size[1]), strides=(2, 2)))
         if dropout_option:
             model.add(Dropout(0.5))
 
@@ -81,7 +82,10 @@ class ConvolutionalNeuralNetwork(TrainingBase):
                 for i in hidden_layers:
                     model.add(Dense(i, activation=activation_fn, use_bias=use_bias))
 
-        model.add(Dense(1, activation='sigmoid'))
+        # decision function (currently having issue,
+        # expected to have shape (1,) but got array with shape (2,))
+        model.add(Dense(2, activation='sigmoid'))
+        model.add(Activation("softmax"))
 
         # model.add(Dense(10, activation='softmax'))
 

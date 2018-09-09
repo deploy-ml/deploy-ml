@@ -1,12 +1,7 @@
-from keras.preprocessing.image import ImageDataGenerator
-from os import listdir
-from os.path import isfile, join
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import img_to_array
 from keras.utils import to_categorical
-from imutils import paths
 import numpy as np
-import argparse
 import random
 import cv2
 import os
@@ -40,7 +35,7 @@ def load_picture_data(dims_one=28, dims_two=28, outcome_pointer="positive",
         # extract the class label from the image path and update the
         # labels list
         label = imagePath.split(os.path.sep)[-2]
-        label = 1 if label == outcome_pointer else 0
+        label = 1 if label == positive_file else 0
         labels.append(label)
 
     data = np.array(data, dtype="float") / 255.0

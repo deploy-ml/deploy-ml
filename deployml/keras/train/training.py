@@ -66,8 +66,9 @@ class TrainingBase(DeploymentBase):
 
             self.model.fit_generator(aug.flow(self.X_train, self.y_train, batch_size=batch_size),
                                      validation_data=(self.X_test, self.y_test),
-                                     steps_per_epoch=len(self.X_train) // batch_size,
-                                     epochs=epochs, verbose=1)
+                                     # steps_per_epoch=len(self.X_train) / batch_size,
+                                     epochs=epochs, verbose=1
+                                     )
 
         else:
             self.X = self.data.drop(self.outcome_pointer, axis=1)
