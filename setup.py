@@ -33,7 +33,8 @@ setuptools.setup(
         'sklearn',
         'numpy',
         'matplotlib',
-        'keras'
+        'keras',
+        'tensorflow'
     ],
     zip_safe=False
 )
