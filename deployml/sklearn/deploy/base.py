@@ -45,6 +45,8 @@ class DeploymentBase:
             self.package["scaler"] = "Data was not scaled for training"
         self.package["system version"] = str(sys.version)
         self.package["sklearn version"] = sklearn.__version__
+        self.package["package version"] = "1"
+        self.package["package type"] = "pickle"
         pickle.dump(self.package, open(file_name, 'wb'))
 
     def deploy_keras_model(self, description, author, organisation, file_name, contact="no contact information provided"):

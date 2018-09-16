@@ -15,6 +15,9 @@ class DeploymentBase:
         self.scaled_inputs = None
         self.scaling_title = None
         self.scaling_tool = None
+        self.convolutional = None
+        self.dims_one = None
+        self.dims_two = None
 
     def deploy_model(self, description, author, organisation, file_name, contact="no contact information provided"):
         """
@@ -36,15 +39,22 @@ class DeploymentBase:
         self.package["contact"] = contact
         self.package["date"] = str(datetime.now())
         self.package["metrics"] = self.general_report
-        self.package["input order"] = list(self.X.columns.values)
-        self.package["prediction target"] = self.outcome_pointer
+        self.package["convolutional"] = self.convolutional
         if self.scaled_inputs:
             self.package["scaler"] = self.scaling_tool
             self.package["scaling used"] = self.scaling_title
         else:
-            self.package["scaler"] = "Data was not scaled for training"
+            self.package["scaler"] = None
+            self.package["scaling used"] = "Data was not scaled for training"
         self.package["system version"] = str(sys.version)
-        self.package["Keras Version"] = keras.__version__
+        self.package["Keras Version"] = str(keras.__version__)
+        self.package["package version"] = "1"
+        if self.convolutional:
+            self.package["image dims"] = (self.dims_one, self.dims_two)
+        else:
+            self.package["input order"] = list(self.X.columns.values)
+            self.package["prediction target"] = self.outcome_pointer
+        self.package["package type"] = "pickle"
         pickle.dump(self.package, open(file_name, 'wb'))
 
     def deploy_keras_model(self, description, author, organisation, file_name, contact="no contact information provided"):
