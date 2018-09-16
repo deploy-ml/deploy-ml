@@ -51,6 +51,7 @@ class TrainingBase(DeploymentBase):
         self.convolutional = convolutional
         self.dims_one = 28
         self.dims_two = 28
+        self.y_cache = None
 
     def train(self, scale=False, scaling_tool='standard',
                     resample=False, resample_ratio=1, epochs=150, batch_size=100, verbose=0):
@@ -115,12 +116,12 @@ class TrainingBase(DeploymentBase):
         """
         plt.figure(figsize=(15, 7))
         if metric == 'loss':
-            plt.plot(self.history.history['loss'], "r-+", linewidth=2, label="train")
-            plt.plot(self.history.history['val_loss'], "b-", linewidth=3, label="val")
+            plt.plot(self.model.history.history['loss'], "r-+", linewidth=2, label="train")
+            plt.plot(self.model.history.history['val_loss'], "b-", linewidth=3, label="val")
 
         elif metric == 'accuracy':
-            plt.plot(self.history.history['acc'], "r-+", linewidth=2, label="train")
-            plt.plot(self.history.history['val_acc'], "b-", linewidth=3, label="val")
+            plt.plot(self.model.history.history['acc'], "r-+", linewidth=2, label="train")
+            plt.plot(self.model.history.history['val_acc'], "b-", linewidth=3, label="val")
 
         plt.xlabel("Iterations")
         plt.ylabel('Error')
@@ -152,17 +153,6 @@ class TrainingBase(DeploymentBase):
         if save:
             plt.savefig('ROC')
         plt.show()
-
-    def evaluate_outcome(self):
-        """
-        Prints classification report of finished model
-        :return: list of predictions from the X_test data subset
-        """
-
-        self.predictions = self.model.predict_classes(self.X_test)
-
-        self.general_report = classification_report(self.y_test, self.predictions)
-        print(self.general_report)
 
 # this cross val needs work, it's currently not supported by Keras
     def evaluate_cross_validation(self, n_splits=10, random_state=7):
@@ -202,3 +192,32 @@ class TrainingBase(DeploymentBase):
                 return self.model.predict([input_array])[0][0]
             else:
                 return self.model.predict([input_array])[0][0]
+
+    def evaluate_outcome(self, threshold=0.5):
+        """
+        Prints classification report of finished model
+        :return: list of predictions from the X_test data subset
+        """
+
+        if self.convolutional:
+            self.predictions = []
+            for i in self.X_test:
+                image = np.expand_dims(i, axis=0)
+                calculation = self.model.predict(image)[0][0]
+                if calculation >= threshold:
+                    self.predictions.append(1)
+                else:
+                    self.predictions.append(0)
+
+            self.y_cache = []
+            for i in self.y_test:
+                self.y_cache.append(i[0])
+            self.general_report = classification_report(self.y_cache, self.predictions)
+            print("Metrics for a cut off of: {}".format(0.5))
+            print(self.general_report)
+
+        else:
+            self.predictions = self.model.predict_classes(self.X_test)
+
+            self.general_report = classification_report(self.y_test, self.predictions)
+            print(self.general_report)
