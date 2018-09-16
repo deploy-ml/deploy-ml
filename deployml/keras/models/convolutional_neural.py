@@ -91,7 +91,7 @@ class ConvolutionalNeuralNetwork(TrainingBase):
 
         model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-        super().__init__(selected_model=model, convolutional=True)
+        super().__init__(selected_model=model, convolutional=True, input_dims=input_dims)
 
     def set_image_paths(self, positive_path, negative_path):
         """
