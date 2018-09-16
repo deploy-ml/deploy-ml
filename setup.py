@@ -34,7 +34,8 @@ setuptools.setup(
         'numpy',
         'matplotlib',
         'keras',
-        'tensorflow'
+        'tensorflow',
+        'cv2'
     ],
     zip_safe=False
 )
