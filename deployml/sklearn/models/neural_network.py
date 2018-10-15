@@ -36,4 +36,7 @@ class NeuralNetworkBase(TrainingBase):
         Defines the structure of the matrix weights, useful for
         printing
         """
+        # you can see here how to loop through the weights to extract the matrices 
+        # you will have to extract these weights and use normal matrix multiplication
+        # to replicate the results 
         self.structure = [matrix.shape for matrix in self.model.coefs_]
