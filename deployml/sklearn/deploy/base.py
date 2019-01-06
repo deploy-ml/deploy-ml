@@ -2,6 +2,7 @@ from datetime import datetime
 import sys
 import sklearn
 import pickle
+import json
 
 
 class DeploymentBase:
@@ -48,6 +49,47 @@ class DeploymentBase:
         self.package["package version"] = "1"
         self.package["package type"] = "pickle"
         pickle.dump(self.package, open(file_name, 'wb'))
+
+    def deploy_dml(self, description, author, organisation, file_name, contact="no contact information provided"):
+        supported_models = ["Logistic Regression"]
+        if self.model_title not in supported_models:
+            pass
+
+        self.package["model title"] = self.model_title
+        self.package["description"] = description
+        self.package["author"] = author
+        self.package["organisation"] = organisation
+        self.package["contact"] = contact
+        self.package["date"] = str(datetime.now())
+        # TODO surrounding
+        # self.package["metrics"] = self.general_report
+        self.package["input order"] = list(self.X.columns.values)
+        self.package["prediction target"] = self.outcome_pointer
+
+        # extra logic will be needed
+        if self.scaled_inputs:
+            self.package["scaler"] = self.scaling_tool
+            self.package["scaling used"] = self.scaling_title
+        else:
+            self.package["scaler"] = "Data was not scaled for training"
+
+        # define the model coefs here
+        if self.model_title == "Logistic Regression":
+            self.package["weight vector"] = self.model.coef_[0].tolist()
+            self.package["intercept"] = self.model.intercept_[0]
+
+        self.package["sklearn version"] = sklearn.__version__
+        self.package["package version"] = "1"
+        self.package["package type"] = ".dml"
+
+        myfile = open('xyz.dml', 'w')
+        for key in self.package.keys():
+            myfile.write("%s" % key + "££@" + str(self.package[key]) + "$$@")
+
+        myfile.close()
+        # text_file.close()
+
+        # print(json_test)
 
     def deploy_keras_model(self, description, author, organisation, file_name, contact="no contact information provided"):
         """
