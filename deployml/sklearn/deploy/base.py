@@ -82,11 +82,11 @@ class DeploymentBase:
         self.package["package version"] = "1"
         self.package["package type"] = ".dml"
 
-        myfile = open('xyz.dml', 'w')
+        dml_file = open('{}.dml'.format(file_name), 'w')
         for key in self.package.keys():
-            myfile.write("%s" % key + "££@" + str(self.package[key]) + "$$@")
+            dml_file.write("%s" % key + "££@" + str(self.package[key]) + "$$@")
 
-        myfile.close()
+        dml_file.close()
         # text_file.close()
 
         # print(json_test)

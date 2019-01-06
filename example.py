@@ -30,7 +30,7 @@ log.deploy_dml(description="this is a test", author="maxwell flitton", organisat
 
 from deployml.sklearn.loader.load_base import DmlLoader
 
-test = DmlLoader(file_path='test.json')
+test = DmlLoader(file_path='test.dml')
 test.configure_model()
 print(test.calculate([1, 2, 3, 4, 5, 6, 7, 8]))
 print(log.model.predict_proba([[1, 2, 3, 4, 5, 6, 7, 8]]))
